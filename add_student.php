@@ -1,5 +1,5 @@
 <?php
-// add_student.php (Modified for student_id)
+
 session_start();
 
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {

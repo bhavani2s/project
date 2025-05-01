@@ -1,5 +1,6 @@
 <?php
-// admin_login.php
+session_start();
+
 $servername = "localhost";
 $username_db = "root";
 $password_db = "";
@@ -11,43 +12,105 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-session_start();
-
-if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
-    header("Location: admin_dashboard.php");
-    exit;
-}
+$error_message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST["username"];
+    $admin_id = $_POST["admin_id"];
     $password = $_POST["password"];
-
-    $username = mysqli_real_escape_string($conn, $username);
-    $sql = "SELECT * FROM admins WHERE username = '$username'";
-    $result = $conn->query($sql);
-
-    if ($result->num_rows == 1) {
-        $row = $result->fetch_assoc();
-        if ($password === $row["password"]) {
-            $_SESSION['admin_logged_in'] = true;
-            $_SESSION['admin_username'] = $username;
-            header("Location: admin_dashboard.php");
-            exit;
-        } else {
-            $error_message = "Incorrect password.";
-        }
-    } else {
-        $error_message = "Incorrect username.";
+    
+    //handle if the user didnt select any items.
+    if(!isset($_POST['captcha_answer'])){
+        $error_message = "Please enter the text shown in the CAPTCHA.";
     }
+    else{
+        $captcha_answer = $_POST["captcha_answer"]; //  Get user's answer
+        $stored_answer = $_SESSION["captcha_answer"];
+
+        $admin_id = mysqli_real_escape_string($conn, $admin_id);
+        $sql = "SELECT * FROM admins WHERE admin_id = '$admin_id'";
+        $result = $conn->query($sql);
+
+        if (strtolower($captcha_answer) == strtolower($stored_answer)) {
+            if ($result->num_rows == 1) {
+                $row = $result->fetch_assoc();
+                if ($password === $row["password"]) {
+                    $_SESSION['admin_logged_in'] = true;
+                    $_SESSION['admin_id'] = $admin_id;
+                    header("Location: admin_dashboard.php");
+                    exit;
+                } else {
+                    $error_message = "Incorrect password.";
+                }
+            } else {
+                $error_message = "Incorrect Admin ID.";
+            }
+        } else {
+            $error_message = "Incorrect CAPTCHA answer. Please try again.";
+        }
+    }
+    
 }
 
-$conn->close();
+
+
+function generate_captcha() {
+    //removed arrays of questions and answers and just generate a random string
+    $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    $captcha_string = '';
+    for ($i = 0; $i < 6; $i++) { // You can change 6 to the desired length of the CAPTCHA string
+        $captcha_string .= $characters[rand(0, strlen($characters) - 1)];
+    }
+    
+    $answer = strtolower($captcha_string);
+    
+    return array("question" => $captcha_string, "answer" => $answer);
+}
+
+// Generate CAPTCHA on page load
+if (!isset($_SESSION['captcha_answer'])) {
+    $captcha_data = generate_captcha();
+    $_SESSION["captcha_answer"] = $captcha_data["answer"];
+    $captcha_question = $captcha_data["question"];
+} else {
+     $captcha_question = $_SESSION["captcha_answer"];
+}
+
+
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>Admin Login</title>
+    <style>
+        .captcha-container {
+            margin-bottom: 20px;
+        }
+        .captcha-text {
+            padding: 10px;
+            border: 2px solid #ccc;
+            text-align: center;
+            margin: 5px;
+            display: inline-block;
+            width: 150px;
+            user-select: none;
+            font-family: monospace; /* Use a monospace font for better readability of CAPTCHA text */
+            font-size: 1.2em;  /* Adjust size as needed */
+            background-color: #f0f0f0; /* Light background */
+            border-radius: 5px;
+        }
+        .captcha-input {
+            padding: 8px;
+            margin-top: 10px;
+            width: 150px;
+        }
+        .refresh-captcha {
+            cursor: pointer;
+            margin-left: 10px;
+            color: blue;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <h2>Admin Login</h2>
@@ -57,13 +120,36 @@ $conn->close();
     <?php } ?>
 
     <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-        <label for="username">Username:</label>
-        <input type="text" name="username" id="username" required><br><br>
+        <label for="admin_id">Admin ID:</label>
+        <input type="text" name="admin_id" id="admin_id" required><br><br>
 
         <label for="password">Password:</label>
         <input type="password" name="password" id="password" required><br><br>
 
+        <p>Enter the text shown below:</p>
+        <div class="captcha-container">
+            <div class="captcha-text"><?php echo $captcha_question; ?></div>
+            <button type="button" class="refresh-captcha" onclick="refreshCaptcha()">Refresh</button>
+            <input type="text" name="captcha_answer" id="captcha_answer" class = "captcha-input" required>
+        </div>
+
         <input type="submit" value="Login">
     </form>
+    
+    <script>
+        function refreshCaptcha() {
+            // Use AJAX to call admin_captch_generate.php
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "admin_captch_generate.php", true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    document.querySelector('.captcha-text').textContent = response.question; // Corrected line
+                    document.getElementById('captcha_answer').value = '';
+                }
+            };
+            xhr.send();
+        }
+    </script>
 </body>
 </html>

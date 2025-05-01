@@ -1,5 +1,4 @@
 <?php
-// teacher_login.php
 session_start();
 
 $servername = "localhost";
@@ -21,21 +20,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $teacher_id = mysqli_real_escape_string($conn, $teacher_id);
 
-    $sql = "SELECT * FROM teachers WHERE teacher_id = '$teacher_id'";
+    $sql = "SELECT teacher_id, teacher_name, password, department FROM teachers WHERE teacher_id = '$teacher_id'"; // Fetch department
     $result = $conn->query($sql);
 
     if ($result->num_rows == 1) {
         $row = $result->fetch_assoc();
         if ($password === $row["password"]) {
             $_SESSION['teacher_logged_in'] = true;
-            $_SESSION['teacher_id'] = $teacher_id;
+            $_SESSION['teacher_id'] = $row["teacher_id"];
+            $_SESSION['teacher_name'] = $row["teacher_name"];
+            $_SESSION['teacher_department'] = $row["department"]; // Store department in session
             header("Location: teacher_dashboard.php");
             exit;
         } else {
             $error_message = "Incorrect password.";
         }
     } else {
-        $error_message = "Incorrect teacher ID.";
+        $error_message = "Incorrect Teacher ID.";
     }
 }
 

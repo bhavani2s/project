@@ -1,5 +1,5 @@
 <?php
-// student_login.php
+
 session_start();
 
 $servername = "localhost";
@@ -21,21 +21,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $student_id = mysqli_real_escape_string($conn, $student_id);
 
-    $sql = "SELECT * FROM students WHERE student_id = '$student_id'";
+    $sql = "SELECT student_id, student_name, password, course, year FROM students WHERE student_id = '$student_id'";
     $result = $conn->query($sql);
 
     if ($result->num_rows == 1) {
         $row = $result->fetch_assoc();
         if ($password === $row["password"]) {
             $_SESSION['student_logged_in'] = true;
-            $_SESSION['student_id'] = $student_id;
+            $_SESSION['student_id'] = $row["student_id"];
+            $_SESSION['student_name'] = $row["student_name"];
+            $_SESSION['course'] = $row["course"]; 
+            $_SESSION['year'] = $row["year"];   
             header("Location: student_dashboard.php");
             exit;
         } else {
             $error_message = "Incorrect password.";
         }
     } else {
-        $error_message = "Incorrect student ID.";
+        $error_message = "Incorrect Student ID.";
     }
 }
 

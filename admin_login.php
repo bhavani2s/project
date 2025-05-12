@@ -6,6 +6,7 @@ $username_db = "root";
 $password_db = "";
 $dbname = "sai";
 
+
 $conn = new mysqli($servername, $username_db, $password_db, $dbname);
 
 if ($conn->connect_error) {
@@ -18,12 +19,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $admin_id = $_POST["admin_id"];
     $password = $_POST["password"];
     
-    //handle if the user didnt select any items.
     if(!isset($_POST['captcha_answer'])){
         $error_message = "Please enter the text shown in the CAPTCHA.";
     }
     else{
-        $captcha_answer = $_POST["captcha_answer"]; //  Get user's answer
+        $captcha_answer = $_POST["captcha_answer"]; 
         $stored_answer = $_SESSION["captcha_answer"];
 
         $admin_id = mysqli_real_escape_string($conn, $admin_id);
@@ -54,10 +54,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
 function generate_captcha() {
-    //removed arrays of questions and answers and just generate a random string
     $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     $captcha_string = '';
-    for ($i = 0; $i < 6; $i++) { // You can change 6 to the desired length of the CAPTCHA string
+    for ($i = 0; $i < 6; $i++) { 
         $captcha_string .= $characters[rand(0, strlen($characters) - 1)];
     }
     
@@ -66,7 +65,6 @@ function generate_captcha() {
     return array("question" => $captcha_string, "answer" => $answer);
 }
 
-// Generate CAPTCHA on page load
 if (!isset($_SESSION['captcha_answer'])) {
     $captcha_data = generate_captcha();
     $_SESSION["captcha_answer"] = $captcha_data["answer"];
@@ -94,9 +92,9 @@ if (!isset($_SESSION['captcha_answer'])) {
             display: inline-block;
             width: 150px;
             user-select: none;
-            font-family: monospace; /* Use a monospace font for better readability of CAPTCHA text */
-            font-size: 1.2em;  /* Adjust size as needed */
-            background-color: #f0f0f0; /* Light background */
+            font-family: monospace; 
+            font-size: 1.2em; 
+            background-color: #f0f0f0; 
             border-radius: 5px;
         }
         .captcha-input {
@@ -138,7 +136,6 @@ if (!isset($_SESSION['captcha_answer'])) {
     
     <script>
         function refreshCaptcha() {
-            // Use AJAX to call admin_captch_generate.php
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "admin_captch_generate.php", true);
             xhr.onreadystatechange = function() {

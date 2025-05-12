@@ -464,7 +464,7 @@ logMessage("--- End of Request ---");
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none;
+            pointer-events: none; /* Initially, don't allow pointer events */
         }
 
 
@@ -508,6 +508,15 @@ logMessage("--- End of Request ---");
             <div class="dropdown">
                 <button>Text Size</button>
                 <div class="dropdown-content">
+                    <a href="#" onclick="formatText('fontSize', '2')">2</a>
+                    <a href="#" onclick="formatText('fontSize', '4')">4</a>
+                    <a href="#" onclick="formatText('fontSize', '6')">6</a>
+                    <a href="#" onclick="formatText('fontSize', '8')">8</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button>Font Style</button>
+                <div class="dropdown-content" styleass="dropdown-content" style="overflow-y: auto; max-height: 200px;">
                     <a href="#" onclick="formatText('fontSize', '2')">2</a>
                     <a href="#" onclick="formatText('fontSize', '4')">4</a>
                     <a href="#" onclick="formatText('fontSize', '6')">6</a>
@@ -840,8 +849,7 @@ logMessage("--- End of Request ---");
                     textEditor.style.backgroundColor = '#444';
                     textEditor.style.color = '#f0f0f0';
                     textEditor.style.borderColor = '#666';
-                }
-                const menuBarButtons = document.querySelectorAll('.menu-bar button');
+                }const menuBarButtons = document.querySelectorAll('.menu-bar button');
                 menuBarButtons.forEach(button => {
                     button.style.backgroundColor = '#555';
                     button.style.color = '#f0f0f0';
@@ -852,7 +860,58 @@ logMessage("--- End of Request ---");
                     button.style.color = '#f0f0f0';
                 });
                 const dropdownContents = document.querySelectorAll('.dropdown-content');
-                dropdownContents.forEach(content => {content.style.backgroundColor = '#f9f9f9';
+                dropdownContents.forEach(content => {
+                    content.style.backgroundColor = '#555';
+                    content.style.color = '#f0f0f0';
+                    content.style.borderColor = '#666';
+                });
+                const dropdownLinks = document.querySelectorAll('.dropdown-content a');
+                dropdownLinks.forEach(link => {
+                    link.style.color = '#f0f0f0';
+                });
+                const modalContent = document.querySelector('.modal-content');
+                if (modalContent) {
+                    modalContent.style.backgroundColor = '#444';
+                    modalContent.style.color = '#f0f0f0';
+                    modalContent.style.borderColor = '#666';
+                }
+                const modalHeader = document.querySelector('.modal-header');
+                if (modalHeader) {
+                    modalHeader.style.borderColor = '#666';
+                }
+                const modalBodyInputs = document.querySelectorAll('.modal-body input');
+                modalBodyInputs.forEach(input => {
+                    input.style.backgroundColor = '#555';
+                    input.style.color = '#f0f0f0';
+                    input.style.borderColor = '#666';
+                });
+                const modalFooterButtons = document.querySelectorAll('.modal-footer button');
+                modalFooterButtons.forEach(button => {
+                    button.style.backgroundColor = '#0056b3';
+                    button.style.color = '#f0f0f0';
+                });
+            } else {
+                document.body.style.backgroundColor = '#fff';
+                document.body.style.color = '#000';
+                const textEditor = document.querySelector('.text-editor');
+                if (textEditor) {
+                    textEditor.style.backgroundColor = '#fff';
+                    textEditor.style.color = '#000';
+                    textEditor.style.borderColor = '#ddd';
+                }
+                const menuBarButtons = document.querySelectorAll('.menu-bar button');
+                menuBarButtons.forEach(button => {
+                    button.style.backgroundColor = '#eee';
+                    button.style.color = '#000';
+                });
+                const toolBarButtons = document.querySelectorAll('.toolbar button, .dropdown > button');
+                toolBarButtons.forEach(button => {
+                    button.style.backgroundColor = '#eee';
+                    button.style.color = '#000';
+                });
+                const dropdownContents = document.querySelectorAll('.dropdown-content');
+                dropdownContents.forEach(content => {
+                    content.style.backgroundColor = '#f9f9f9';
                     content.style.color = '#000';
                     content.style.borderColor = '#ccc';
                 });
@@ -937,10 +996,10 @@ logMessage("--- End of Request ---");
                 } else if (fileExtension === 'doc' || fileExtension === 'docx') {
                     const docLink = document.createElement('a');
                     docLink.href = '#';
-                    docLink.textContent = Download Document: ${fileName};
+                    docLink.textContent = `Download Document: ${fileName}`;
                     docLink.addEventListener('click', (e) => {
                         e.preventDefault();
-                        alert(The file "${fileName}" will be downloaded.);
+                        alert(`The file "${fileName}" will be downloaded.`);
                     });
                     assignmentText.appendChild(docLink);
                     assignmentText.appendChild(document.createElement('br'));
@@ -948,10 +1007,10 @@ logMessage("--- End of Request ---");
                 } else {
                     const otherFileLink = document.createElement('a');
                     otherFileLink.href = '#';
-                    otherFileLink.textContent = Download File: ${fileName};
+                    otherFileLink.textContent = `Download File: ${fileName}`;
                     otherFileLink.addEventListener('click', (e) => {
                         e.preventDefault();
-                        alert(The file "${fileName}" will be downloaded.);
+                        alert(`The file "${fileName}" will be downloaded.`);
                     });
                     assignmentText.appendChild(otherFileLink);
                     assignmentText.appendChild(document.createElement('br'));
